@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const bodyPaser = require('body-parser');
 const mongoose = require('mongoose');
 const cred = require('./credentials');
+const cors = require('cors');
 
 //enventually process.env.MONGO_ATLAS_PW + '...'
 mongoose.connect(cred.connectionString, {
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use(cors());
 //Routes which should handle request
 app.use('/users', userRoutes);
 app.use('/alerts', alertRoutes);

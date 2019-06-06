@@ -2,34 +2,36 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Alert = require('../models/alert');
+const { loginAuth } = require('../auth/check-auth');
 const User = require('../models/user');
 
-router.post('/api/createAlert', (req, res, next) => {
+router.post('/api/createAlert', /*loginAuth*/ (req, res, next) => {
     User.findById(req.body.userId)
     .then(user => {
         if(!user) {
             return res.status(404).json({
                     message: 'Sorry, alert was NOT created. You need to be loged in to create a alert.'
             });
-        }
+        } 
         const alert = new Alert ({
             _id: new mongoose.Types.ObjectId(),
             user: req.body.userId,
             title: req.body.title,
             importance: req.body.importance,
             description: req.body.description,
-            date: req.body.date
-            });
-            return alert.save();
+            date: req.body.date,
+             });
+           
+            alert.save();
             })
             .then(result => {
                 res.status(201).json({
                     message: 'Alert was created',
                     newAlert: {
-                        user: result.user,
-                        title: result.title,
-                        importance: result.importance,
-                        description: result.description,
+                        user: result.body.userId,
+                        title: result.body.title,
+                        importance: result.body.importance,
+                        description: result.body.description,
                         date: result.date,
                         _id: result._id,
                         request: {
@@ -45,8 +47,13 @@ router.post('/api/createAlert', (req, res, next) => {
             });
     
 });
-
-router.get('/api/allAlerts', (req, res, next) => {
+router.post('/api/createAlert-1', /*loginAuth*/ (req, res, next) => {
+    Alert.create(red.body)
+    .save()
+    
+    
+});
+router.get('/api/allAlerts', loginAuth,  (req, res, next) => {
     Alert.find()
     .select('title importance description date')
     .exec()
@@ -75,7 +82,7 @@ router.get('/api/allAlerts', (req, res, next) => {
                 });
 });
 
-router.get('/api/selectAlert/:alertId', (req, res, next) => {
+router.get('/api/selectAlert/:alertId', loginAuth,  (req, res, next) => {
     const id = req.params.alertId;
         Alert.findById(id)
         .select('title description importance date')
@@ -95,7 +102,7 @@ router.get('/api/selectAlert/:alertId', (req, res, next) => {
         });
 });
 
-router.patch('/api/changeAlert/:alertId', (req, res, next) => {
+router.patch('/api/changeAlert/:alertId', loginAuth, (req, res, next) => {
     const id = req.params.alertId;
     const updateOps = {};
     for (const ops of req.body) {

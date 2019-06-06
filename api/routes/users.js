@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const {loginAuth, adminAuth} = require('../auth/check-auth');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 //decide how files will be storage
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
 }); 
 
 /* const fileFilter = (req, file, cd) => {
-    if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+    if(file.mi  metype === 'image/jpeg' || file.mimetype === 'image/png'){
         cd(null, true);
     }else {
         //could trow a error
@@ -37,7 +38,7 @@ router.post('/api/registerUser', (req, res, next) => {
             bcrypt.hash(req.body.password, 10, (err, hash) => {
                 if(err) { 
                  return res.status(500).json({
-                     error: err});
+                     error: err}); 
               }else{
                  const user = new User ({
                      _id: new mongoose.Types.ObjectId(),
@@ -45,7 +46,8 @@ router.post('/api/registerUser', (req, res, next) => {
                      firstName: req.body.firstName,
                      lastName: req.body.lastName,
                      email: req.body.email,
-                     password: hash
+                     password: hash,
+                     role: req.body.role
                  });
                  user
                  .save()
@@ -63,7 +65,7 @@ router.post('/api/registerUser', (req, res, next) => {
          }
     });
  }); 
-router.post('/api/login' , (req, res, next) => {
+router.post('/api/login', (req, res, next) => {
     User.find({email: req.body.email})
     .exec()
     .then(user => {
@@ -109,7 +111,7 @@ router.get('/api/allUsers', (req, res, next)=> {
                 return {
                     firstName: item.firstName,
                     lastName: item.lastName,
-                    email: item.email,
+                     email: item.email,
                     _id: item._id,
                     userImage: item.userImage,
                     request: {
@@ -133,7 +135,7 @@ router.get('/api/allUsers', (req, res, next)=> {
     })
 });
 
-router.get('/api/selectUser/:userId', (req, res, next) => {
+router.get('/api/selectUser/:userId', loginAuth, (req, res, next) => {
     const id =  req.params.userId;
     User.findById(id)
         .select('firstName lastName email _id')
@@ -168,7 +170,7 @@ router.patch('/api/changeUser/:userId', (req, res, next) => {
     User.update({_id: id}, {$set: updateOps})
     .exec()
     .then(result => {
-        console.log(result);
+        console.log(result);  
       res.status(200).json({
             message: 'User updated',
             request: {
