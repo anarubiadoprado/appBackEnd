@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 //create schema that contain the locationt the alert was created.
 
- /* const AlertLocation = mongoose.Schema({
+ const AlertLocation = mongoose.Schema({
         type: {
             type: String, // Don't do `{ location: { type: String } }`
             enum: ['Point'], // 'location.type' must be 'Point'
@@ -11,8 +11,8 @@ const mongoose = require('mongoose');
             type: [Number],
             index: '2dsphere',
             required: true
-          },
-});  */
+          }
+});  
 
 //create alert schema
 const alertSchema = mongoose.Schema({
@@ -22,7 +22,7 @@ const alertSchema = mongoose.Schema({
     importance: String,
     description: {type: String, require: true},
     date: {type: Date, default: Date.now },
-   // location: AlertLocation,
+    location: AlertLocation
 });
 
 module.exports = mongoose.model('Alert', alertSchema);

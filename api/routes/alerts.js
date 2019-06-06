@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const User = require('../models/user');
 const Alert = require('../models/alert');
 const { loginAuth } = require('../auth/check-auth');
-const User = require('../models/user');
 
 router.post('/api/createAlert', /*loginAuth*/ (req, res, next) => {
     User.findById(req.body.userId)
     .then(user => {
-        if(!user) {
+        if(! user) {
             return res.status(404).json({
                     message: 'Sorry, alert was NOT created. You need to be loged in to create a alert.'
             });
-        } 
+        }  
         const alert = new Alert ({
             _id: new mongoose.Types.ObjectId(),
             user: req.body.userId,
@@ -20,10 +20,10 @@ router.post('/api/createAlert', /*loginAuth*/ (req, res, next) => {
             importance: req.body.importance,
             description: req.body.description,
             date: req.body.date,
+            location: req.body.location,
              });
            
-            alert.save();
-            })
+            alert.save()
             .then(result => {
                 res.status(201).json({
                     message: 'Alert was created',
@@ -33,6 +33,7 @@ router.post('/api/createAlert', /*loginAuth*/ (req, res, next) => {
                         importance: result.body.importance,
                         description: result.body.description,
                         date: result.date,
+                        location: req.body.location,
                         _id: result._id,
                         request: {
                             type: 'GET',
@@ -45,15 +46,31 @@ router.post('/api/createAlert', /*loginAuth*/ (req, res, next) => {
             .catch(err => {
                 res.status(404).json({error: err});
             });
-    
+        });  
+
+router.post('/api/v2/createAlert', /*loginAuth*/ (req, res, next) => {
+    Alert.create( newAlert => {
+        const alert = new Alert ({
+        _id: new mongoose.Types.ObjectId(),
+        title: req.body.title,
+        importance: req.body.importance,
+        description: req.body.description,
+        date: req.body.date,
+        location: req.body.location,
+        });
+        console.log(alert);
+    alert.save()
+    .then(result => {
+        console.log(result);
+        res.status(201).json({message: 'success'});
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(404).json({message: 'Blah! :('});
+    })  
+ }); 
 });
-router.post('/api/createAlert-1', /*loginAuth*/ (req, res, next) => {
-    Alert.create(red.body)
-    .save()
-    
-    
-});
-router.get('/api/allAlerts', loginAuth,  (req, res, next) => {
+router.get('/api/allAlerts',  (req, res, next) => {
     Alert.find()
     .select('title importance description date')
     .exec()
